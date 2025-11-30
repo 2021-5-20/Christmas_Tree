@@ -54,6 +54,11 @@ const CONFIG = {
   }
 };
 
+// MediaPipe asset locations (online CDN)
+const GESTURE_MODEL_PATH = '/models/gesture_recognizer.task'; // 你已有本地模型
+const MEDIAPIPE_WASM_ROOT = '/mediapipe';
+
+
 // --- Shader Material (Foliage) ---
 const FoliageMaterial = shaderMaterial(
   { uTime: 0, uColor: new THREE.Color(CONFIG.colors.emerald), uProgress: 0 },
@@ -612,16 +617,16 @@ const GestureController = ({ onGesture, onMove, onStatus, debugMode }: any) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    let gestureRecognizer: GestureRecognizer;
+    let gestureRecognizer: GestureRecognizer | null = null;
     let requestRef: number;
 
     const setup = async () => {
-      onStatus("DOWNLOADING AI...");
       try {
-        const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+        onStatus("DOWNLOADING AI...");
+        const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_ROOT);
         gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
           baseOptions: {
-            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+            modelAssetPath: GESTURE_MODEL_PATH,
             delegate: "GPU"
           },
           runningMode: "VIDEO",
